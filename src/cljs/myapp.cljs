@@ -1,5 +1,13 @@
 (ns myapp.game)
 
+(defn layer-ctor []
+  (this-as this
+    (.associateWithNative js/cc this (.-Layer js/cc))))
+
+(defn scene-ctor []
+  (this-as this
+    (.associateWithNative js/cc this (.-Scene js/cc))))
+
 (defn init-fn []
   (this-as this
     (._super this)
@@ -15,7 +23,7 @@
       (.setTouchEnabled this true)
 
 
-      (set! (.-scoreLabel this) (.create cc/LabelTTF "0" "Arial" 32 200))
+      (set! (.-scoreLabel this) (.create cc/LabelTTF "0" "Arial" 32))
       (doto (.-scoreLabel this)
         (.setAnchorPoint (.p js/cc 0 0))
         (.setPosition (.p js/cc 130 (- (.-height size) 48)))
@@ -41,11 +49,13 @@
                     js/sprite js/null
                     js/scoreLabel js/null
                     js/init init-fn
+                    js/ctor layer-ctor
                     js/onTouchesBegan on-touches-began))
  
 (def ^:export hello-world-layer (.extend cc/Layer params))
 
-(def scene-params (js-obj js/onEnter (fn []
+(def scene-params (js-obj js/ctor scene-ctor
+                   js/onEnter (fn []
   (this-as this
     (._super this)
     (let [layer (hello-world-layer.)]
