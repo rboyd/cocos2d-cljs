@@ -11,15 +11,38 @@
         (.setAnchorPoint (.p js/cc 0.5 0.5))
         (.setScale 0.5)
         (.setRotation 90))
-      (.addChild this (.-sprite this) 0))))
+      (.addChild this (.-sprite this) 0)
+      (.setTouchEnabled this true)
 
+
+      (set! (.-scoreLabel this) (.create cc/LabelTTF "0" "Arial" 32 200))
+      (doto (.-scoreLabel this)
+        (.setAnchorPoint (.p js/cc 0 0))
+        (.setPosition (.p js/cc 130 (- (.-height size) 48)))
+        (.setHorizontalAlignment (.-TEXT_ALIGNMENT_LEFT js/cc)))
+
+      (.addChild this (.-scoreLabel this)))))
+
+
+(def clicks (atom 0))
+
+(defn on-touches-began [touches events]
+  (this-as this
+    (let [sprite (.-sprite this)
+          current-rotation (.getRotation sprite)]
+      (swap! clicks inc)
+      (.setString (.-scoreLabel this) @clicks)
+      (.setRotation sprite (+ current-rotation 5)))))
+ 
 (def params (js-obj js/isMouseDown false
                     js/helloImg js/null
                     js/helloLb js/null
                     js/circle js/null
                     js/sprite js/null
-                    js/init init-fn))
-
+                    js/scoreLabel js/null
+                    js/init init-fn
+                    js/onTouchesBegan on-touches-began))
+ 
 (def ^:export hello-world-layer (.extend cc/Layer params))
 
 (def scene-params (js-obj js/onEnter (fn []

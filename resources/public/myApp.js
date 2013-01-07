@@ -497,6 +497,15 @@ goog.base = function(me, opt_methodName, var_args) {
 goog.scope = function(fn) {
   fn.call(goog.global)
 };
+goog.provide("goog.debug.Error");
+goog.debug.Error = function(opt_msg) {
+  this.stack = (new Error).stack || "";
+  if(opt_msg) {
+    this.message = String(opt_msg)
+  }
+};
+goog.inherits(goog.debug.Error, Error);
+goog.debug.Error.prototype.name = "CustomError";
 goog.provide("goog.string");
 goog.provide("goog.string.Unicode");
 goog.string.Unicode = {NBSP:"\u00a0"};
@@ -924,15 +933,6 @@ goog.string.toSelectorCaseCache_ = {};
 goog.string.toSelectorCase = function(str) {
   return goog.string.toSelectorCaseCache_[str] || (goog.string.toSelectorCaseCache_[str] = String(str).replace(/([A-Z])/g, "-$1").toLowerCase())
 };
-goog.provide("goog.debug.Error");
-goog.debug.Error = function(opt_msg) {
-  this.stack = (new Error).stack || "";
-  if(opt_msg) {
-    this.message = String(opt_msg)
-  }
-};
-goog.inherits(goog.debug.Error, Error);
-goog.debug.Error.prototype.name = "CustomError";
 goog.provide("goog.asserts");
 goog.provide("goog.asserts.AssertionError");
 goog.require("goog.debug.Error");
@@ -20189,28 +20189,46 @@ cljs.core.UUID;
 goog.provide("myapp.game");
 goog.require("cljs.core");
 myapp.game.init_fn = function init_fn() {
-  var this__6105 = this;
-  this__6105._super();
-  var size__6106 = cc.Director.getInstance().getWinSize();
-  this__6105.sprite = cc.Sprite.create("res/HelloWorld.png");
-  var G__6107__6108 = this__6105.sprite;
-  G__6107__6108.setPosition(cc.p(size__6106.width / 2, size__6106.height / 2));
-  G__6107__6108.setVisible(true);
-  G__6107__6108.setAnchorPoint(cc.p(0.5, 0.5));
-  G__6107__6108.setScale(0.5);
-  G__6107__6108.setRotation(90);
-  G__6107__6108;
-  return this__6105.addChild(this__6105.sprite, 0)
+  var this__6107 = this;
+  this__6107._super();
+  var size__6108 = cc.Director.getInstance().getWinSize();
+  this__6107.sprite = cc.Sprite.create("res/HelloWorld.png");
+  var G__6109__6110 = this__6107.sprite;
+  G__6109__6110.setPosition(cc.p(size__6108.width / 2, size__6108.height / 2));
+  G__6109__6110.setVisible(true);
+  G__6109__6110.setAnchorPoint(cc.p(0.5, 0.5));
+  G__6109__6110.setScale(0.5);
+  G__6109__6110.setRotation(90);
+  G__6109__6110;
+  this__6107.addChild(this__6107.sprite, 0);
+  this__6107.setTouchEnabled(true);
+  this__6107.scoreLabel = cc.LabelTTF.create("0", "Arial", 32, 200);
+  var G__6111__6112 = this__6107.scoreLabel;
+  G__6111__6112.setAnchorPoint(cc.p(0, 0));
+  G__6111__6112.setPosition(cc.p(130, size__6108.height - 48));
+  G__6111__6112.setHorizontalAlignment(cc.TEXT_ALIGNMENT_LEFT);
+  G__6111__6112;
+  return this__6107.addChild(this__6107.scoreLabel)
 };
-myapp.game.params = {isMouseDown:false, helloImg:null, helloLb:null, circle:null, sprite:null, init:myapp.game.init_fn};
+myapp.game.clicks = cljs.core.atom.call(null, 0);
+myapp.game.on_touches_began = function on_touches_began(touches, events) {
+  var this__6117 = this;
+  var sprite__6118 = this__6117.sprite;
+  var current_rotation__6119 = sprite__6118.getRotation();
+  cljs.core.swap_BANG_.call(null, myapp.game.clicks, cljs.core.inc);
+  var this__6120 = this;
+  this__6120.scoreLabel.setString(cljs.core.deref.call(null, myapp.game.clicks));
+  return sprite__6118.setRotation(current_rotation__6119 + 5)
+};
+myapp.game.params = {isMouseDown:false, helloImg:null, helloLb:null, circle:null, sprite:null, scoreLabel:null, init:myapp.game.init_fn, onTouchesBegan:myapp.game.on_touches_began};
 myapp.game.hello_world_layer = cc.Layer.extend(myapp.game.params);
 goog.exportSymbol("myapp.game.hello_world_layer", myapp.game.hello_world_layer);
 myapp.game.scene_params = {onEnter:function() {
-  var this__6109 = this;
-  this__6109._super();
-  var layer__6110 = new myapp.game.hello_world_layer;
-  layer__6110.init();
-  return this__6109.addChild(layer__6110)
+  var this__6121 = this;
+  this__6121._super();
+  var layer__6122 = new myapp.game.hello_world_layer;
+  layer__6122.init();
+  return this__6121.addChild(layer__6122)
 }};
 myapp.game.hello_world_scene = cc.Scene.extend(myapp.game.scene_params);
 goog.exportSymbol("myapp.game.hello_world_scene", myapp.game.hello_world_scene);
