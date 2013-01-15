@@ -20196,46 +20196,63 @@ myapp.game.scene_ctor = function scene_ctor() {
   var this__6104 = this;
   return cc.associateWithNative(this__6104, cc.Scene)
 };
+myapp.game.space = cljs.core.atom.call(null, new cp.Space);
 myapp.game.init_fn = function init_fn() {
-  var this__6111 = this;
-  this__6111._super();
-  var size__6112 = cc.Director.getInstance().getWinSize();
-  this__6111.sprite = cc.Sprite.create("res/HelloWorld.png");
-  var G__6113__6114 = this__6111.sprite;
-  G__6113__6114.setPosition(cc.p(size__6112.width / 2, size__6112.height / 2));
-  G__6113__6114.setVisible(true);
-  G__6113__6114.setAnchorPoint(cc.p(0.5, 0.5));
-  G__6113__6114.setScale(0.5);
-  G__6113__6114.setRotation(90);
-  G__6113__6114;
-  this__6111.addChild(this__6111.sprite, 0);
-  this__6111.setTouchEnabled(true);
-  this__6111.scoreLabel = cc.LabelTTF.create("0", "Arial", 32);
-  var G__6115__6116 = this__6111.scoreLabel;
-  G__6115__6116.setAnchorPoint(cc.p(0, 0));
-  G__6115__6116.setPosition(cc.p(130, size__6112.height - 48));
-  G__6115__6116.setHorizontalAlignment(cc.TEXT_ALIGNMENT_LEFT);
+  var this__6112 = this;
+  this__6112._super();
+  var size__6113 = cc.Director.getInstance().getWinSize();
+  this__6112.sprite = cc.PhysicsSprite.create("watermelon.png");
+  this__6112.body = new cp.Body(1, cp.momentForBox(1, 48, 48));
+  this__6112.sprite.setBody(this__6112.body);
+  cljs.core.deref.call(null, myapp.game.space).addBody(this__6112.body);
+  var shape__6114 = new cp.BoxShape(this__6112.body, 64, 64);
+  shape__6114.setElasticity(1);
+  shape__6114.setFriction(1);
+  cljs.core.deref.call(null, myapp.game.space).addShape(shape__6114);
+  var G__6115__6116 = this__6112.sprite;
+  G__6115__6116.setPosition(cc.p(size__6113.width / 2, size__6113.height / 2));
+  G__6115__6116.setVisible(true);
+  G__6115__6116.setAnchorPoint(cc.p(0.5, 0.5));
+  G__6115__6116.setScale(0.5);
+  G__6115__6116.setRotation(90);
   G__6115__6116;
-  return this__6111.addChild(this__6111.scoreLabel)
+  this__6112.addChild(this__6112.sprite, 0);
+  this__6112.setTouchEnabled(true);
+  this__6112.scoreLabel = cc.LabelTTF.create("0", "Arial", 32);
+  var G__6117__6118 = this__6112.scoreLabel;
+  G__6117__6118.setAnchorPoint(cc.p(0, 0));
+  G__6117__6118.setPosition(cc.p(130, size__6113.height - 48));
+  G__6117__6118.setHorizontalAlignment(cc.TEXT_ALIGNMENT_LEFT);
+  G__6117__6118;
+  return this__6112.addChild(this__6112.scoreLabel)
 };
 myapp.game.clicks = cljs.core.atom.call(null, 0);
 myapp.game.on_touches_began = function on_touches_began(touches, events) {
-  var this__6120 = this;
-  var sprite__6121 = this__6120.sprite;
-  var current_rotation__6122 = sprite__6121.getRotation();
+  var this__6122 = this;
+  var sprite__6123 = this__6122.sprite;
+  var current_rotation__6124 = sprite__6123.getRotation();
   cljs.core.swap_BANG_.call(null, myapp.game.clicks, cljs.core.inc);
-  this__6120.scoreLabel.setString(cljs.core.deref.call(null, myapp.game.clicks));
-  return sprite__6121.setRotation(current_rotation__6122 + 5)
+  this__6122.scoreLabel.setString(cljs.core.deref.call(null, myapp.game.clicks));
+  return sprite__6123.setRotation(current_rotation__6124 + 5)
 };
 myapp.game.params = {isMouseDown:false, helloImg:null, helloLb:null, circle:null, sprite:null, scoreLabel:null, init:myapp.game.init_fn, ctor:myapp.game.layer_ctor, onTouchesBegan:myapp.game.on_touches_began};
 myapp.game.hello_world_layer = cc.Layer.extend(myapp.game.params);
 goog.exportSymbol("myapp.game.hello_world_layer", myapp.game.hello_world_layer);
-myapp.game.scene_params = {ctor:myapp.game.scene_ctor, onEnter:function() {
-  var this__6123 = this;
-  this__6123._super();
-  var layer__6124 = new myapp.game.hello_world_layer;
-  layer__6124.init();
-  return this__6123.addChild(layer__6124)
+myapp.game.update = function update(delta) {
+  return cljs.core.deref.call(null, myapp.game.space).step(delta)
+};
+myapp.game.scene_params = {ctor:myapp.game.scene_ctor, space:null, update:myapp.game.update, onEnter:function() {
+  var this__6125 = this;
+  this__6125._super();
+  var wall__6126 = new cp.SegmentShape(cljs.core.deref.call(null, myapp.game.space).staticBody, cp.v(0, 0), cp.v(800, 0), 0);
+  wall__6126.setElasticity(1);
+  wall__6126.setFriction(1);
+  cljs.core.deref.call(null, myapp.game.space).addStaticShape(wall__6126);
+  cljs.core.deref.call(null, myapp.game.space).gravity = cp.v(0, -100);
+  this__6125.scheduleUpdate();
+  var layer__6127 = new myapp.game.hello_world_layer;
+  layer__6127.init();
+  return this__6125.addChild(layer__6127)
 }};
 myapp.game.hello_world_scene = cc.Scene.extend(myapp.game.scene_params);
 goog.exportSymbol("myapp.game.hello_world_scene", myapp.game.hello_world_scene);
