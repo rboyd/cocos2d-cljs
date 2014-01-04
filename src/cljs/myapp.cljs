@@ -1,4 +1,5 @@
-(ns myapp.game)
+(ns myapp.game
+  (:require [clojure.browser.repl :as repl]))
 
 (defn layer-ctor []
   (this-as this
@@ -11,6 +12,8 @@
 (def space (atom (cp/Space.)))
 
 (defn init-fn []
+  (repl/connect "http://localhost:9000/repl")
+
   (this-as this
     (._super this)
     (let [size (-> cc/Director .getInstance .getWinSize)]
@@ -54,11 +57,11 @@
       (.setRotation sprite (+ current-rotation 5)))))
 
 (def params (js-obj js/isMouseDown false
-                    js/helloImg js/null
-                    js/helloLb js/null
-                    js/circle js/null
-                    js/sprite js/null
-                    js/scoreLabel js/null
+                    js/helloImg nil
+                    js/helloLb nil
+                    js/circle nil
+                    js/sprite nil
+                    js/scoreLabel nil
                     js/init init-fn
                     js/ctor layer-ctor
                     js/onTouchesBegan on-touches-began))
@@ -69,7 +72,7 @@
   (.step @space delta))
 
 (def scene-params (js-obj js/ctor scene-ctor
-                   js/space js/null
+                   js/space nil
                    js/update update
                    js/onEnter (fn []
   (this-as this
